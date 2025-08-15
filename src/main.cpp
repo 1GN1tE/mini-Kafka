@@ -1,19 +1,12 @@
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <netdb.h>
-#include <string>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <pthread.h>
-#include <bits/stdc++.h>
+#include "headers.hpp"
 #include "kafkaConnection.hpp"
+#include "broker.hpp"
+
+
 #define WORKER_THREADS 4
 std::queue<int> clientReqest;
 pthread_mutex_t lock=PTHREAD_MUTEX_INITIALIZER;
+Broker broker;
 void *handleClientRequests(void* arg){
     while(true){
         pthread_mutex_lock(&lock);
@@ -22,7 +15,7 @@ void *handleClientRequests(void* arg){
             clientReqest.pop();
             pthread_mutex_unlock(&lock);
             kafkaConnection connection(client_fd);
-            connection.processRequest();
+            connection.processRequest(broker);
             close(client_fd);
         }else{
             pthread_mutex_unlock(&lock);

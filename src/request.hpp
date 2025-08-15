@@ -1,10 +1,8 @@
-#include <bits/stdc++.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <sys/types.h>
+#include "headers.hpp"
+#pragma once
+
 class Request
 {
-private:
     
 public:
     int32_t message_size;
@@ -12,7 +10,8 @@ public:
     int16_t request_api_version;
     int32_t correlation_id;
     std::string client_id;
-
+    std::vector<std::string> topics;
+    int32_t partion_count;
     std::int32_t getCollationId()
     {
         return correlation_id;

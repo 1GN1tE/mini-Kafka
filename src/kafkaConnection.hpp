@@ -1,16 +1,9 @@
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <cerrno>
-#include <cstring>
-#include <iostream>
-#include <vector>
-#include <stdexcept>
-
+#include "headers.hpp"
+#pragma once
 #include "request.hpp"
 #include "response.hpp"
-
+#include "apiResponse.hpp"
+#include "broker.hpp"
 template <typename T>
 T read_big_endian(const char *data)
 {
@@ -31,11 +24,11 @@ class kafkaConnection
 {
 public:
     kafkaConnection(int fd) : m_socket_fd(fd) {}
-    
-    void processRequest()
+
+    void processRequest(Broker &broker)
     {
         while (true)
-        {
+        {   APIResponse apiResponse;
             Request req;
             if (!read_request(req))
             {
@@ -43,25 +36,8 @@ public:
                 break;
             }
 
-            Response response(req.correlation_id);
-            auto version = req.request_api_version;
-
-            if (version >= 0 && version <= 4)
-            {
-                response.append(htons(0));                // error code
-                response.append(static_cast<uint8_t>(2)); // Tag field for api key
-                response.append(htons(18));               // API index (18 == ApiVersions)
-                response.append(htons(0));                // Min versions
-                response.append(htons(4));                // Max version
-                response.append(static_cast<uint8_t>(0)); // Tag field for api key
-                response.append(htonl(0));                // Throttle field
-                response.append(static_cast<uint8_t>(0)); // Tag field for response
-            }
-            else
-            {
-                response.append(htons(35)); // error code
-            }
-
+            Response response=apiResponse.createResponse(req, broker);       
+            response.adjustMessageSize();     
             sendResponse(response);
         }
     }
@@ -125,6 +101,24 @@ private:
         {
             req.client_id.clear();
         }
+        ptr+= client_id_len+1;
+        uint8_t topic_count = *ptr++ -1;
+        for(int i = 0; i < topic_count; ++i)
+        {
+            uint8_t topic_len = read_big_endian<uint8_t>(ptr)-1;
+
+            ptr += 1;
+            if (topic_len > 0 && static_cast<size_t>(ptr - buffer + topic_len) <= sizeof(buffer))
+            {
+                req.topics.emplace_back(ptr, ptr + topic_len);
+            }
+            else
+            {
+                req.topics.emplace_back();
+            }
+            ptr += topic_len + 1; // +1 for tag buffer
+        }
+        req.partion_count = read_big_endian<int32_t>(ptr);
 
         return true;
     }
@@ -158,7 +152,7 @@ private:
         }
         else
         {
-            std::cout << "Sent " << sent << " bytes in one send()\n";
+            std::cout <<"Size of msg is "<<response.getMessageSize() <<" Sent " << sent << " bytes in one send()\n";
         }
     }
 };

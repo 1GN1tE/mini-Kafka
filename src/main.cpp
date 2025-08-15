@@ -7,17 +7,39 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include "kafkaConnection.cpp"
-struct client_request {
-        int message_size;
-        int16_t request_api_key;
-        int16_t request_api_version;
-        int correlation_id;
-};
+#include <fcntl.h>
+#include <pthread.h>
+#include <bits/stdc++.h>
+#include "kafkaConnection.hpp"
+#define WORKER_THREADS 4
+std::queue<int> clientReqest;
+pthread_mutex_t lock=PTHREAD_MUTEX_INITIALIZER;
+void *handleClientRequests(void* arg){
+    while(true){
+        pthread_mutex_lock(&lock);
+        if(!clientReqest.empty()){
+            int client_fd = clientReqest.front();
+            clientReqest.pop();
+            pthread_mutex_unlock(&lock);
+            kafkaConnection connection(client_fd);
+            connection.processRequest();
+            close(client_fd);
+        }else{
+            pthread_mutex_unlock(&lock);
+            usleep(1000); // Sleep for a short time to avoid busy waiting
+        }
+    }
+}
 int main(int argc, char* argv[]) {
     std::cout << std::unitbuf;
     std::cerr << std::unitbuf;
-
+    pthread_t threads[WORKER_THREADS];
+    //Create Worker Threads
+    for(int i=0;i<WORKER_THREADS;i++){
+        if(pthread_create(&threads[i], nullptr, handleClientRequests, nullptr)!=0){
+            std::cout<<"Error in creating threads"<<std::endl;
+            return -1;}
+    }
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd < 0) {
         std::cerr << "Failed to create server socket: " << std::endl;
@@ -51,22 +73,20 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Waiting for a client to connect...\n";
 
-    struct sockaddr_in client_addr{};
-    socklen_t client_addr_len = sizeof(client_addr);
+    while(true){
+        struct sockaddr_in client_addr{};
+        socklen_t client_addr_len = sizeof(client_addr);
 
-    std::cerr << "Logs from your program will appear here!\n";
+        std::cerr << "Logs from your program will appear here!\n";
 
-    int client_fd = accept(server_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &client_addr_len);
-    std::cout << "Client connected\n";
+        int client_fd = accept(server_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &client_addr_len);
+        std::cout << "Client connected\n";
+            
+        pthread_mutex_lock(&lock);
+        clientReqest.push(client_fd);   
+        pthread_mutex_unlock(&lock);
 
-    
-    kafkaConnection connection;
-    connection.processRequest(client_fd);    
-
-
-    
-    close(client_fd);
-
+    }
     close(server_fd);
     return 0;
 }

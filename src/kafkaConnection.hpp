@@ -3,7 +3,6 @@
 #include "request.hpp"
 #include "response.hpp"
 #include "apiResponse.hpp"
-#include "broker.hpp"
 template <typename T>
 T read_big_endian(const char *data)
 {
@@ -25,7 +24,7 @@ class kafkaConnection
 public:
     kafkaConnection(int fd) : m_socket_fd(fd) {}
 
-    void processRequest(Broker &broker)
+    void processRequest()
     {
         while (true)
         {   APIResponse apiResponse;
@@ -36,7 +35,7 @@ public:
                 break;
             }
 
-            Response response=apiResponse.createResponse(req, broker);       
+            Response response=apiResponse.createResponse(req);       
             response.adjustMessageSize();     
             sendResponse(response);
         }

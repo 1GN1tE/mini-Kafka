@@ -1,12 +1,13 @@
 #include "headers.hpp"
 #include "kafkaConnection.hpp"
-#include "broker.hpp"
+
+
 
 
 #define WORKER_THREADS 4
 std::queue<int> clientReqest;
 pthread_mutex_t lock=PTHREAD_MUTEX_INITIALIZER;
-Broker broker;
+
 void *handleClientRequests(void* arg){
     while(true){
         pthread_mutex_lock(&lock);
@@ -15,7 +16,7 @@ void *handleClientRequests(void* arg){
             clientReqest.pop();
             pthread_mutex_unlock(&lock);
             kafkaConnection connection(client_fd);
-            connection.processRequest(broker);
+            connection.processRequest();
             close(client_fd);
         }else{
             pthread_mutex_unlock(&lock);

@@ -3,6 +3,7 @@
 #include "request.hpp"
 #include "response.hpp"
 #include "apiResponse.hpp"
+
 template <typename T>
 T read_big_endian(const char *data)
 {
@@ -27,16 +28,18 @@ public:
     void processRequest()
     {
         while (true)
-        {   APIResponse apiResponse;
+        {
+            APIResponse apiResponse;
             Request req;
             if (!read_request(req))
             {
                 std::cerr << "Client closed connection or invalid request.\n";
                 break;
             }
-
-            Response response=apiResponse.createResponse(req);       
-            response.adjustMessageSize();     
+            std::cout << "Creating response for request with API Key: " << req.getRequestApiKey() << "\n";
+            Response response = apiResponse.createResponse(req);
+            response.adjustMessageSize();
+            std::cout << "Sending response  " << "\n";
             sendResponse(response);
         }
     }
@@ -65,6 +68,7 @@ private:
 
     bool read_request(Request &req)
     {
+        std::cout << "Reading request...\n";
         char buffer[1024];
 
         // Read message size
@@ -100,11 +104,12 @@ private:
         {
             req.client_id.clear();
         }
-        ptr+= client_id_len+1;
-        uint8_t topic_count = *ptr++ -1;
-        for(int i = 0; i < topic_count; ++i)
+        ptr += client_id_len + 1;
+
+        uint8_t topic_count = *ptr++ - 1;
+        for (int i = 0; i < topic_count; ++i)
         {
-            uint8_t topic_len = read_big_endian<uint8_t>(ptr)-1;
+            uint8_t topic_len = read_big_endian<uint8_t>(ptr) - 1;
 
             ptr += 1;
             if (topic_len > 0 && static_cast<size_t>(ptr - buffer + topic_len) <= sizeof(buffer))
@@ -151,7 +156,7 @@ private:
         }
         else
         {
-            std::cout <<"Size of msg is "<<response.getMessageSize() <<" Sent " << sent << " bytes in one send()\n";
+            std::cout << "Size of msg is " << response.getMessageSize() << " Sent " << sent << " bytes in one send()\n";
         }
     }
 };

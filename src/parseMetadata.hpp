@@ -5,18 +5,18 @@
 #include <map>
 #include <string>
 
-class parseMetadata {
+class parseMetadata
+{
 private:
-
     std::vector<uint8_t> cluster_metadata = {};
     std::map<int64_t, int32_t> batch_info = {};
     std::vector<int32_t> records_num = {};
     std::set<std::string> topic_name = {};
-    std::map<std::string, std::vector<uint8_t> > nameToTopicId = {};
+    std::map<std::string, std::vector<uint8_t>> nameToTopicId = {};
 
-    std::map<std::vector<uint8_t>, std::vector<std::vector<uint8_t> > > topicToPars = {};
+    std::map<std::vector<uint8_t>, std::vector<std::vector<uint8_t>>> topicToPars = {};
 
-    std::vector<std::vector<uint8_t> > partitions = {};
+    std::vector<std::vector<uint8_t>> partitions = {};
     std::size_t offsetToRec = 0;
 
     int64_t toBigEndian(int64_t littleEndianVal);
@@ -43,6 +43,4 @@ public:
     std::vector<std::vector<uint8_t>> getSerPartitions(std::vector<uint8_t> topic_id) const;
     bool judgeTopicName(std::string name) const;
     std::vector<uint8_t> getTopicUuid(std::string topicN) const;
-
 };
-

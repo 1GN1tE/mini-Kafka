@@ -11,6 +11,7 @@ struct api_key
     api_key(int16_t min_v, int16_t max_v)
         : min_version(min_v), max_version(max_v) {}
 };
+
 class APIResponse
 {
 public:
@@ -19,10 +20,12 @@ public:
     APIResponse()
     {
         // Initialize with some default API versions
+        api_versions[0] = api_key(0, 11); // Produce
+        api_versions[1] = api_key(0, 16); // Fetch
         api_versions[18] = api_key(0, 4); // ApiVersions
         api_versions[75] = api_key(0, 0); // DescribeTopicPartitions
-        api_versions[1]=api_key(0,16);//fetch
     }
+
     void handleResponseFor18(Response &response)
     {
         response.append(htons(0));                                      // error code
@@ -47,6 +50,7 @@ public:
         response.append(htonl(0));                // throttle_time
         response.append(static_cast<uint8_t>(0)); // tag
     }
+
     void handleUnknownTopic(const std::string &topic, Response &res)
     {
         // This function now only appends the details for a single unknown topic.
@@ -68,6 +72,7 @@ public:
         res.append(static_cast<uint8_t>(0xFF)); // next_cursor null
         res.append(static_cast<uint8_t>(0));    // final tag buffer
     }
+
     void addPartionInformation(Response &res)
     {
         for (int i = 0; i < 2; i++)
@@ -90,6 +95,7 @@ public:
             res.append(static_cast<uint8_t>(0)); // empty partition tag buffer
         }
     }
+
     void handleResponsFor75(const Request &req, Response &res)
     {
         uint8_t tagged_fields = 0;
@@ -159,6 +165,16 @@ public:
         res.append(tagged_fields);
     }
 
+    void handleResponseFor1(Response &response)
+    {
+        response.append(static_cast<uint8_t>(0)); // tagged fields
+        response.append(htons(0));                // error code
+        response.append(htonl(0));                // throttle_time_ms
+        response.append(htonl(0));                // session_id
+        response.append(static_cast<uint8_t>(0)); // tag
+        response.append(static_cast<uint8_t>(0)); // final tag buffer
+    }
+
     void handleResponseFor35(Response &response)
     {
         response.append(htons(35));               // error code
@@ -172,23 +188,28 @@ public:
         response.append(htonl(0));                // throttle_time
         response.append(static_cast<uint8_t>(0)); // tag
     }
+
     Response createResponse(Request &req)
     {
         Response response(req.correlation_id);
         auto version = req.request_api_version;
-
-        if (version >= 0 && version <= 4)
+        std::cout << "Request API Key: " << req.request_api_key << ", Version: " << version << std::endl;
+        auto it = api_versions.find(req.request_api_key);
+        if (it != api_versions.end() && (version >= it->second.min_version && version <= it->second.max_version))
         {
+            std::cout << "Found" << std::endl;
             switch (req.request_api_key)
             {
+            case 1:
+                handleResponseFor1(response);
+                break;
             case 18:
                 handleResponseFor18(response);
-                /* code */
                 break;
-                // Add more cases for other API keys as needed
             case 75:
                 handleResponsFor75(req, response);
                 break;
+
             default:
                 break;
             }

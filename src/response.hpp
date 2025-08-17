@@ -21,7 +21,7 @@ public:
     }
     void adjustMessageSize()
     {
-        
+
         m_message_size = sizeof(corelation_id) + m_data.size();
     }
     template <typename T>

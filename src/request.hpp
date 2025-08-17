@@ -3,7 +3,7 @@
 
 class Request
 {
-    
+
 public:
     int32_t message_size;
     int16_t request_api_key;

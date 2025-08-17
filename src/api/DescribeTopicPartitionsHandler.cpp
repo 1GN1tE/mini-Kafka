@@ -1,18 +1,16 @@
 #include "api/DescribeTopicPartitionsHandler.hpp"
 #include "storage/IMetadataStore.hpp"
 #include "protocol/BufferReader.hpp"
-#include <iostream>
 
 DescribeTopicPartitionsHandler::DescribeTopicPartitionsHandler(std::shared_ptr<IMetadataStore> store)
     : metadata_store(store) {}
 
 kafka::protocol::Response DescribeTopicPartitionsHandler::handle(const kafka::protocol::Request &request)
 {
-    // --- Step 1: Parse the request body ---
+    // Parse the request body
     kafka::protocol::BufferReader reader(request.body);
     std::vector<std::string> requested_topics;
 
-    // This parsing logic is specific to DescribeTopicPartitions v0-v12.
     int32_t topic_array_size = reader.readInt8() - 1;
     for (int32_t i = 0; i < topic_array_size; ++i)
     {

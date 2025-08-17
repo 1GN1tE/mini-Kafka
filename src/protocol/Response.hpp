@@ -16,6 +16,7 @@ namespace kafka::protocol
         void writeInt8(int8_t val);
         void writeInt16(int16_t val);
         void writeInt32(int32_t val);
+        void writeInt64(int64_t val);
         void writeString(const std::string &s);
         void writeBytes(const std::vector<uint8_t> &bytes);
         void writeRawBytes(const char *data, size_t len);

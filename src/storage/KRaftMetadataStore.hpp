@@ -18,11 +18,11 @@ public:
 
     // IMetadataStore Interface Implementation
     bool is_topic_known(const std::string &name) const override;
+    bool is_uuid_known(const std::vector<uint8_t> &uuid) const override;
     std::vector<uint8_t> get_topic_uuid(const std::string &topicN) const override;
     std::vector<std::vector<uint8_t>> get_serialized_partitions(const std::vector<uint8_t> &topic_id) const override;
 
 private:
-
     // State Variables
     std::vector<uint8_t> cluster_metadata;
     std::map<int64_t, int32_t> batch_info;

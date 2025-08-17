@@ -20,6 +20,7 @@ namespace kafka::protocol
         int32_t readInt32();
         std::string readString();
         std::string readString(size_t len);
+        std::vector<uint8_t> readBytes(size_t len);
 
         void skip(size_t bytes);
         bool eof() const; // End of file/buffer

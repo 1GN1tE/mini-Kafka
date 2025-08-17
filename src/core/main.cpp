@@ -37,9 +37,9 @@ int main(int argc, char *argv[])
         auto apiVersionsHandler = std::make_unique<ApiVersionsHandler>(apiRouter);
 
         // apiRouter->registerHandler(0, 0, 11, std::make_unique<ProduceHandler>());
-        apiRouter->registerHandler(1,  0, 16, std::make_unique<FetchHandler>());
-        apiRouter->registerHandler(18, 0, 4,  std::move(apiVersionsHandler));
-        apiRouter->registerHandler(75, 0, 0,  std::make_unique<DescribeTopicPartitionsHandler>(metadataStore));// To add a new API, just add a new `registerHandler` line here.
+        apiRouter->registerHandler(1, 0, 16, std::make_unique<FetchHandler>(metadataStore));
+        apiRouter->registerHandler(18, 0, 4, std::move(apiVersionsHandler));
+        apiRouter->registerHandler(75, 0, 0, std::make_unique<DescribeTopicPartitionsHandler>(metadataStore));
 
         std::cout << "API handlers registered.\n";
 

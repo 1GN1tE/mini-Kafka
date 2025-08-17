@@ -1,5 +1,7 @@
 #include "protocol/Response.hpp"
 #include <cstring>
+#include <cstdint>
+#include <endian.h>
 
 namespace kafka::protocol
 {
@@ -21,6 +23,13 @@ namespace kafka::protocol
     void Response::writeInt32(int32_t val)
     {
         int32_t be_val = htonl(val);
+        const char *p = reinterpret_cast<const char *>(&be_val);
+        data.insert(data.end(), p, p + sizeof(be_val));
+    }
+
+    void Response::writeInt64(int64_t val)
+    {
+        int64_t be_val = htobe64(val);
         const char *p = reinterpret_cast<const char *>(&be_val);
         data.insert(data.end(), p, p + sizeof(be_val));
     }

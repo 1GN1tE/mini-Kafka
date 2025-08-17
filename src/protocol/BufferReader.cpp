@@ -66,6 +66,15 @@ namespace kafka::protocol
         return s;
     }
 
+    std::vector<uint8_t> BufferReader::readBytes(size_t len)
+    {
+        ensure_can_read(len);
+        const uint8_t *start = reinterpret_cast<const uint8_t *>(m_data + m_pos);
+        std::vector<uint8_t> bytes(start, start + len);
+        m_pos += len;
+        return bytes;
+    }
+
     void BufferReader::skip(size_t bytes)
     {
         ensure_can_read(bytes);

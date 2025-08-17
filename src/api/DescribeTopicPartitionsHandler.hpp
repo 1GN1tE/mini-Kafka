@@ -2,7 +2,6 @@
 #include "api/IApiHandler.hpp"
 #include <memory>
 
-// Forward-declare the interface to avoid including the full header here
 class IMetadataStore;
 
 class DescribeTopicPartitionsHandler : public IApiHandler

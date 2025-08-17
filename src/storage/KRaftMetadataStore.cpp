@@ -38,6 +38,19 @@ bool KRaftMetadataStore::is_topic_known(const std::string &name) const
     return topic_name.find(name) != topic_name.end();
 }
 
+bool KRaftMetadataStore::is_uuid_known(const std::vector<uint8_t> &uuid) const
+{
+    for (const auto &[n, id] : nameToTopicId)
+    {
+        if (uuid == id)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 std::vector<uint8_t> KRaftMetadataStore::get_topic_uuid(const std::string &topicN) const
 {
     auto it = nameToTopicId.find(topicN);

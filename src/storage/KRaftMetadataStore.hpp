@@ -21,6 +21,7 @@ public:
     bool is_uuid_known(const std::vector<uint8_t> &uuid) const override;
     std::vector<uint8_t> get_topic_uuid(const std::string &topicN) const override;
     std::vector<std::vector<uint8_t>> get_serialized_partitions(const std::vector<uint8_t> &topic_id) const override;
+    std::vector<uint8_t> getEntireRecBatch(const std::vector<uint8_t> &uuid, const int32_t &parIndex) const override;
 
 private:
     // State Variables

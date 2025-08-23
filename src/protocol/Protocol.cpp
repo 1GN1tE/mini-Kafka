@@ -47,25 +47,6 @@ namespace
         data += len;
         return s;
     }
-
-    // A simplified topic array parser for DescribeTopicPartitions
-    std::vector<std::string> read_topic_array_v12(const char *&data)
-    {
-        std::vector<std::string> topics;
-        int32_t array_len = read_big_endian<int32_t>(data);
-        for (int32_t i = 0; i < array_len; ++i)
-        {
-            // Skipping topic UUID and tags for this simplified parser
-            data += 16; // Skip Topic ID (UUID)
-            std::string topic_name = read_string(data);
-            topics.push_back(topic_name);
-            int32_t num_partitions = read_big_endian<int32_t>(data); // Partition Indices count
-            data += num_partitions * sizeof(int32_t);                // Skip partition indices
-        }
-        // Skipping tagged fields
-        data++;
-        return topics;
-    }
 }
 
 namespace kafka::protocol

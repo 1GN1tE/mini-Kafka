@@ -22,4 +22,6 @@ public:
     virtual std::vector<uint8_t> get_topic_uuid(const std::string &topic_name) const = 0;
 
     virtual std::vector<std::vector<uint8_t>> get_serialized_partitions(const std::vector<uint8_t> &topic_id) const = 0;
+
+    virtual std::vector<uint8_t> getEntireRecBatch(const std::vector<uint8_t> &uuid, const int32_t &parIndex) const = 0;
 };

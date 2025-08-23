@@ -41,6 +41,15 @@ namespace kafka::protocol
         return ntohl(val);
     }
 
+    int64_t BufferReader::readInt64()
+    {
+        ensure_can_read(8);
+        int64_t val;
+        memcpy(&val, m_data + m_pos, 8);
+        m_pos += 8;
+        return static_cast<int64_t>(be64toh(static_cast<uint64_t>(val)));
+    }
+
     std::string BufferReader::readString()
     {
         int16_t len = readInt16();

@@ -18,6 +18,7 @@ namespace kafka::protocol
         int8_t readInt8();
         int16_t readInt16();
         int32_t readInt32();
+        int64_t readInt64();
         std::string readString();
         std::string readString(size_t len);
         std::vector<uint8_t> readBytes(size_t len);

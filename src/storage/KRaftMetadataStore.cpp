@@ -72,6 +72,28 @@ std::vector<std::vector<uint8_t>> KRaftMetadataStore::get_serialized_partitions(
     return {};
 }
 
+std::vector<uint8_t> KRaftMetadataStore::getEntireRecBatch(const std::vector<uint8_t> &topic_id, const int32_t &partition) const
+{
+    std::string topic_name;
+
+    for (const auto &[n, id] : nameToTopicId)
+    {
+        if (topic_id == id)
+        {
+            topic_name = n;
+            break;
+        }
+    }
+
+    std::string log_file = "/tmp/kraft-combined-logs/" + topic_name + "-" + std::to_string(partition) + "/00000000000000000000.log";
+
+    std::ifstream file(log_file, std::ios::binary);
+    if (!file)
+        throw std::runtime_error("Cannot open log file: " + log_file);
+
+    return std::vector<uint8_t>((std::istreambuf_iterator<char>(file)), {});
+}
+
 int64_t KRaftMetadataStore::toBigEndian(int64_t littleEndianVal)
 {
     uint64_t v = static_cast<uint64_t>(littleEndianVal);

@@ -4,8 +4,7 @@
 
 class IMetadataStore;
 
-class DescribeTopicPartitionsHandler : public IApiHandler
-{
+class DescribeTopicPartitionsHandler : public IApiHandler {
 public:
     // We use dependency injection to provide the data store.
     explicit DescribeTopicPartitionsHandler(std::shared_ptr<IMetadataStore> metadata_store);

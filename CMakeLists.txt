@@ -4,8 +4,29 @@ project(mini-kafka)
 
 set(CMAKE_CXX_STANDARD 23) # Enable the C++23 standard
 
-file(GLOB_RECURSE SOURCE_FILES src/*.cpp src/*.hpp)
+# Collect all source files
+file(GLOB_RECURSE SOURCE_FILES 
+    src/api/*.cpp 
+    src/core/*.cpp 
+    src/protocol/*.cpp 
+    src/storage/*.cpp
+)
 
-add_executable(kafka ${SOURCE_FILES})
+# Collect all header files
+file(GLOB_RECURSE HEADER_FILES 
+    src/api/*.hpp 
+    src/core/*.hpp 
+    src/protocol/*.hpp 
+    src/storage/*.hpp
+)
+
+add_executable(kafka 
+    ${SOURCE_FILES}
+    ${HEADER_FILES}
+)
 
 target_include_directories(kafka PUBLIC src)
+
+# Link pthread for threading support
+find_package(Threads REQUIRED)
+target_link_libraries(kafka Threads::Threads)

@@ -1,10 +1,9 @@
 #pragma once
-#include "api/IApiHandler.hpp"
 #include "api/ApiRouter.hpp"
+#include "api/IApiHandler.hpp"
 #include <memory>
 
-class ApiVersionsHandler : public IApiHandler
-{
+class ApiVersionsHandler : public IApiHandler {
 public:
     explicit ApiVersionsHandler(std::shared_ptr<ApiRouter> router);
 
